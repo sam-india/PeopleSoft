@@ -1,22 +1,15 @@
 package org.dev.peoplesoft.service;
 
-import java.math.BigDecimal;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
-import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 
 import org.dev.peoplesoft.model.Employee;
 import org.dev.peoplesoft.repository.EmployeeRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.repository.core.NamedQueries;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -47,12 +40,12 @@ public class EmployeeService {
 	{
 		employeeRepository.delete(employee);
 	}
-
-	public List<Employee> getAllEmployee() {
+	
+	public List<Employee> filterEmployee() {
 		List<Employee> employees = employeeRepository.findAll();
 		List<Employee> filteredAndSortedemployees = new ArrayList<Employee>();
 		employees.stream()
-		.filter(employee -> employee.getDepartmentId() != null && employee.getDepartmentId() == 50)
+		.filter(employee -> employee.getDepartment().getDepartmentId() != null && employee.getDepartment().getDepartmentId() == 50)
 		.sorted((e1,e2) -> e1.getFirstName().compareTo(e2.getFirstName()))
 		.sorted((e1,e2) -> e1.getManagerId().compareTo(e2.getManagerId()))
 		.forEachOrdered(emp -> filteredAndSortedemployees.add(emp));
@@ -63,10 +56,22 @@ public class EmployeeService {
 	
 	public List<Employee> getAllEmployeeEM() {
 		List<Employee> employees = new ArrayList<Employee>();
-		TypedQuery<Employee> queries = entityManager.createNamedQuery("Employee.findAll", Employee.class);
+		TypedQuery<Employee> queries = entityManager.createNamedQuery("Employee.findAllEmployeesByLastNameLength", Employee.class);
 		queries.setParameter("length", 3L);
 		employees = queries.getResultList();
 		return employees;
+	}
+
+	public Employee getEmployeeByEmail(String email) {
+		return employeeRepository.findByEmail(email);
+	}
+
+	public Employee getEmployeeByLastname(String lastName) {
+		return employeeRepository.findEmployeesByLastName(lastName);
+	}
+
+	public List<Employee> getAllEmployeeByDepartmentId(Integer departmentId) {
+		return employeeRepository.findEmployeesByDepartmentId(departmentId);
 	}
 	
 	/*

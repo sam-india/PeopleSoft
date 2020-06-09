@@ -1,25 +1,44 @@
 package org.dev.peoplesoft.model;
 
 import java.io.Serializable;
-import javax.persistence.*;
 import java.math.BigDecimal;
 import java.util.Date;
-import java.math.BigInteger;
-import java.util.List;
 
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
+import javax.persistence.SequenceGenerator;
+import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 
-/**
- * The persistent class for the employees database table.
- * 
- */
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.JsonIdentityReference;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+
 @Entity
 @Table(name="employees")
-@NamedQuery(name="Employee.findAll", query="SELECT e FROM Employee e WHERE CHAR_LENGTH(e.lastName) =:length")
+@SequenceGenerator(
+		sequenceName = "EMP_SEQ_STORE", name = "EMP_SEQ", initialValue = 100
+		)
+@NamedQueries({
+	@NamedQuery(name="Employee.findAllEmployeesByLastNameLength", query="SELECT e FROM Employee e WHERE CHAR_LENGTH(e.lastName) =:length"),
+	@NamedQuery(name="Employee.findEmployeesByLastName", query="SELECT e FROM Employee e WHERE e.lastName =:lastName")
+
+})
 public class Employee implements Serializable {
-	private static final long serialVersionUID = 1L;
+
+	private static final long serialVersionUID = 1549588706958301542L;
 
 	@Id
-	@GeneratedValue(strategy=GenerationType.IDENTITY)
+	@GeneratedValue(strategy=GenerationType.SEQUENCE, generator = "EMP_SEQ_STORE")
 	@Column(name="EMPLOYEE_ID")
 	private Integer empId;
 
@@ -34,6 +53,20 @@ public class Employee implements Serializable {
 
 	@Column(name="PHONE_NUMBER")
 	private String phoneNumber;
+	
+	@Column(name="DEPARTMENT_ID", updatable=false, insertable=false)
+	private Integer departmentId;
+
+	public Integer getDepartmentId() {
+		return departmentId;
+	}
+
+	public void setDepartmentId(Integer departmentId) {
+		this.departmentId = departmentId;
+	}
+
+	public Employee() {
+	}
 
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name="HIRE_DATE")
@@ -51,27 +84,11 @@ public class Employee implements Serializable {
 	@Column(name="MANAGER_ID")
 	private Integer managerId;
 	
-	@Column(name="DEPARTMENT_ID")
-	private Integer departmentId;
-
-	public Employee() {
-	}
-
-	public Employee(Integer empId, String firstName, String lastName, String email, String phoneNumber, Date hireDate,
-			String jobId, BigDecimal salary, BigDecimal commissionPct, Integer managerId, Integer departmentId) {
-		super();
-		this.empId = empId;
-		this.firstName = firstName;
-		this.lastName = lastName;
-		this.email = email;
-		this.phoneNumber = phoneNumber;
-		this.hireDate = hireDate;
-		this.jobId = jobId;
-		this.salary = salary;
-		this.commissionPct = commissionPct;
-		this.managerId = managerId;
-		this.departmentId = departmentId;
-	}
+	//@JsonIgnore
+	@JsonBackReference
+	@ManyToOne
+	@JoinColumn(name = "DEPARTMENT_ID")
+	private Department department;
 
 	public Integer getEmpId() {
 		return empId;
@@ -153,18 +170,11 @@ public class Employee implements Serializable {
 		this.managerId = managerId;
 	}
 
-	public Integer getDepartmentId() {
-		return departmentId;
+	public Department getDepartment() {
+		return department;
 	}
 
-	public void setDepartmentId(Integer departmentId) {
-		this.departmentId = departmentId;
+	public void setDepartment(Department department) {
+		this.department = department;
 	}
-
-	public static long getSerialversionuid() {
-		return serialVersionUID;
-	}
-	
-	
-
 }

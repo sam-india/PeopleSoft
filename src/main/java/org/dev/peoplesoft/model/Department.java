@@ -1,41 +1,57 @@
 package org.dev.peoplesoft.model;
 
 import java.io.Serializable;
-import javax.persistence.*;
+import java.util.List;
 
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.OneToMany;
+import javax.persistence.SequenceGenerator;
+import javax.persistence.Table;
 
-/**
- * The persistent class for the departments database table.
- * 
- */
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.JsonIdentityReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+
 @Entity
 @Table(name="departments")
+@SequenceGenerator(
+		sequenceName = "DEPT_SEQ_STORE", name = "DEPT_SEQ", initialValue = 100
+		)
 //@NamedQuery(name="Department.findAll", query="SELECT d FROM Department d")
+//@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "departmentId")
 public class Department implements Serializable {
-	private static final long serialVersionUID = 1L;
+
+	private static final long serialVersionUID = -8406023587477837020L;
+
+	public Department() {
+		super();
+	}
 
 	@Id
+	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "DEPT_SEQ_STORE")
 	@Column(name="DEPARTMENT_ID")
 	private Integer departmentId;
 
 	@Column(name="DEPARTMENT_NAME")
 	private String departmentName;
+	
+	@Column(name="MANAGER_ID")
+	private Integer managerId;
 
-	//bi-directional many-to-one association to Employee
-	@ManyToOne
-	@JoinColumn(name="MANAGER_ID")
-	private Employee employee;
-
-	//bi-directional many-to-one association to Location
-	@ManyToOne
-	@JoinColumn(name="LOCATION_ID")
-	private Location location;
-
-	public Department() {
-	}
+	@OneToMany(fetch = FetchType.LAZY, mappedBy = "department")
+	//@JsonIdentityReference(alwaysAsId = true)
+	//	@JsonIgnore
+	@JsonManagedReference
+	private List<Employee> employee;
 
 	public Integer getDepartmentId() {
-		return this.departmentId;
+		return departmentId;
 	}
 
 	public void setDepartmentId(Integer departmentId) {
@@ -43,27 +59,29 @@ public class Department implements Serializable {
 	}
 
 	public String getDepartmentName() {
-		return this.departmentName;
+		return departmentName;
 	}
 
 	public void setDepartmentName(String departmentName) {
 		this.departmentName = departmentName;
 	}
 
-	public Employee getEmployee() {
-		return this.employee;
+	public Integer getManagerId() {
+		return managerId;
 	}
 
-	public void setEmployee(Employee employee) {
+	public void setManagerId(Integer managerId) {
+		this.managerId = managerId;
+	}
+
+	public List<Employee> getEmployee() {
+		return employee;
+	}
+
+	public void setEmployee(List<Employee> employee) {
 		this.employee = employee;
 	}
 
-	public Location getLocation() {
-		return this.location;
+	
+	
 	}
-
-	public void setLocation(Location location) {
-		this.location = location;
-	}
-
-}
